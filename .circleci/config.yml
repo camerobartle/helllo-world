@@ -1,0 +1,45 @@
+#!/usr/local/bin/python3
+import sys,getopt,argparse
+import masscan
+import pprint
+
+def scan_masscan(ips):
+
+   try:
+      maso = masscan.PortScanner()
+      maso.scan(ips, ports='80,443')
+   except:
+      print("Error:", sys.exc_info()[0])
+      sys.exit(1)
+
+   return(maso)
+
+def parse_masscan_host_list(massout):
+
+    #initialize
+    host_list = list()
+
+    # Build a list from the massscan output
+    for host in massout.all_hosts:
+       host_list.append(host)
+    return(host_list)
+
+def main():
+   # read in the IP parameter 
+   parser = argparse.ArgumentParser()
+   parser.add_argument('IP', help="IP address or range")
+   args=parser.parse_args()
+   ip=args.IP
+
+   maso=scan_masscan(ip)
+
+   if int(maso.scanstats['uphosts']) > 0:
+      host_list=parse_masscan_host_list(maso)
+      pprint.pprint(host_list)
+
+   else:
+      print("No Masscan results")
+      sys.exit(1)
+
+if __name__ == "__main__":
+    main()
